@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+	"strconv"
 	"github.com/streadway/amqp"
 )
 
 const (
 	CLIENTS = 4
 	SUSHIS = 10
-	sushi_types = {"Nigiri de salmó", "Sashimi de tonyina", "Maki de
-	cranc"}
 )
 
 var (
-	names = [CLIENTS] string {"Cayetano", "Juan", "Victoria", "Francisca"}
-	sushi = [SUSHIS] string {}
+	sushi_types = []string{"Nigiri de salmó", "Sashimi de tonyina", "Maki de cranc"}
+	p int
 )
 
 func failOnError(err error, msg string) {
@@ -66,30 +65,32 @@ func main() {
 			queue.Name,		// routing key
 			false,			// mandatory
 			false,			// immediate
+
 			amqp.Publishing{
 				DeliveryMode: amqp.Persistent,
                 ContentType:  "text/plain",
                 Body:         []byte(sushi_types[sushi]),
-			}
-			failOnError(err, "Failed to publish a message to the queue")
-			fmt.Printf(" [x] %s it's cooked", sushi_types[sushi])
-			time.Sleep(400)
+			},
 		)
+		failOnError(err, "Failed to publish a message to the queue")
+		fmt.Printf(" [x] %s it's cooked", sushi_types[sushi])
+		time.Sleep(400)
 	}
 
 	// Fill the permisions queue
-	perms := SUSHIS
+	p := strconv.Itoa(SUSHIS)
 	err = ch.Publish(
 		"",					// exchange
         consume.name,      	// routing key
         false,            	// mandatory
         false,            	// immediate
+
         amqp.Publishing{
             DeliveryMode: amqp.Persistent,
             ContentType:  "text/plain",
-            Body:         []byte(perms), // The queue is full
-		}
+			Body:         []byte(p),
+		},
 	)
 	failOnError(err, "Failed to publish a message to the consume queue")
-	fmt.Printf(" [x] %s", perms)
+	fmt.Printf(" [x] %s", p)
 }
