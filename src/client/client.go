@@ -72,7 +72,7 @@ func main() {
 	go func() {
 		// Channel to consume sushi
 		cons, err := ch.Consume(
-			queue.name,	// queue
+			queue.Name,	// queue
 			"",      	// consumer
             false,    	// auto-ack
 			false,     	// exclusive
@@ -83,7 +83,7 @@ func main() {
 
 		// Channel to consume perms
 		perms, err := ch.Consume(
-			consume.name,	// queue
+			consume.Name,	// queue
 			"",             // consumer
             false,          // auto-ack
 			false,          // exclusive
@@ -100,9 +100,10 @@ func main() {
 		for i := 0; i < sushi; i++ {
 			// Take a permission to eat
 			for d := range perms {
-				perms, err = strconv.Atoi(string(d.Body))
+				perms, err := strconv.Atoi(string(d.Body))
 				failOnError(err, "Failed to convert body to int")
-				d.ack(false)
+				perms ++
+				d.Ack(false)
 
 				break
 			}
@@ -113,7 +114,7 @@ func main() {
 			for d := range cons {
 				fmt.Printf("Client will eat a  %s\n", string(d.Body))
 				time.Sleep(200)
-				d.ack(false)
+				d.Ack(false)
 
 				break
 			}
@@ -126,7 +127,7 @@ func main() {
 				perms := strconv.Itoa(p)
 				err = ch.Publish(
 					"", 			// exchange
-					consume.name,	// routing key
+					consume.Name,	// routing key
 					false, 			// mandatory
 					false,			// immediate
 

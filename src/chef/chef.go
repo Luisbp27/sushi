@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 	"strconv"
-	"github.com/streadway/amqp"
+	amqp "github.com/streadway/amqp"
 )
 
 const (
@@ -28,11 +28,13 @@ func main() {
 	// Connect to RabbitMQ
     conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
     failOnError(err, "Failed to connect to RabbitMQ")
-    defer failOnError(conn.Close(), "Failed to close the connection")
+    defer conn.Close()
+
+	fmt.Printf("Connecting to RabbitMQ...\n")
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
-	defer failOnError(ch.Close(), "Failed to close the channel")
+	defer ch.Close()
 
 	// Declare the sushi plate queue
 	queue, err := ch.QueueDeclare(
@@ -46,7 +48,7 @@ func main() {
     failOnError(err, "Failed to declare the sushi queue")
 
 	// Declare the consumer permisions to eat
-	consume, err := ch.QueueDeclarePassive(
+	consume, err := ch.QueueDeclare(
         "consume", 	// name
         true,		// durable
         false,		// delete when unused
@@ -81,7 +83,7 @@ func main() {
 	p := strconv.Itoa(SUSHIS)
 	err = ch.Publish(
 		"",					// exchange
-        consume.name,      	// routing key
+        consume.Name,      	// routing key
         false,            	// mandatory
         false,            	// immediate
 

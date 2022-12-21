@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"github.com/streadway/amqp"
+	amqp "github.com/streadway/amqp"
 )
 
 func failOnError(err error, msg string) {
@@ -64,7 +64,7 @@ func main() {
 	go func() {
 		// Channel to consume sushi
 		cons, err := ch.Consume(
-			queue.name,	// queue
+			queue.Name,	// queue
 			"",      	// consumer
             true,    	// auto-ack
 			false,     	// exclusive
@@ -75,7 +75,7 @@ func main() {
 
 		// Channel to consume perms
 		perms, err := ch.Consume(
-			consume.name,	// queue
+			consume.Name,	// queue
 			"",             // consumer
             true,          	// auto-ack
 			false,          // exclusive
