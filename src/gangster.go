@@ -16,11 +16,11 @@ func main() {
 	// Connect to RabbitMQ
     conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
     failOnError(err, "Failed to connect to RabbitMQ")
-    defer failOnError(conn.Close(), "Failed to close the connection")
+    defer conn.Close()
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
-	defer failOnError(ch.Close(), "Failed to close the channel")
+	defer ch.Close()
 
 	// Declare the sushi plate queue
 	queue, err := ch.QueueDeclare(
@@ -38,9 +38,12 @@ func main() {
         0,     	// prefetch size
         false,	// global
 	)
+	
+	failOnError(err, "Failed to declare the consume queue")
+	fmt.Printf("I wanna all the sushi!\n")
 
 	// Declare the consumer permisions to eat
-	consume, err := ch.QueueDeclarePassive(
+	consume, err := ch.QueueDeclare(
         "consume",	// name
         true,		// durable
         false,		// delete when unused
@@ -55,8 +58,8 @@ func main() {
         0,     	// prefetch size
         false,	// global
 	)
-	failOnError(err, "Failed to declare the consume queue")
-	fmt.Printf("I wanna all the sushi!")
+	// failOnError(err, "Failed to declare the consume queue")
+	// fmt.Printf("I wanna all the sushi!")
 
 	// Channel for the client to warn they finished
 	warn := make(chan int)
@@ -90,14 +93,14 @@ func main() {
 		for d := range perms {
 			p, err = strconv.Atoi(string(d.Body))
 			failOnError(err, "Failed to parse the permissions")
-			fmt.Printf("Permissions: %d", p)
+			fmt.Printf("Permissions: %d\n", p)
 
 			break		
 		}
-
+		fmt.Printf("Permissions: %d", p)
 		// The consumer will consume 
 		for d := range cons {
-			fmt.Printf("Sushi piece number: %s", string(d.Body))
+			fmt.Printf("Sushi piece number: %s\n", string(d.Body))
 
 			break
 		}

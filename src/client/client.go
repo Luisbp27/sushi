@@ -23,11 +23,11 @@ func main() {
 	// Connect to RabbitMQ
     conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
     failOnError(err, "Failed to connect to RabbitMQ")
-    defer failOnError(conn.Close(), "Failed to close the connection")
+    defer conn.Close()
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
-	defer failOnError(ch.Close(), "Failed to close the channel")
+	defer ch.Close()
 
 	// Declare the sushi plate queue
 	queue, err := ch.QueueDeclare(
@@ -46,8 +46,11 @@ func main() {
         false,	// global
 	)
 
+	failOnError(err, "Failed to declare the consume queue")
+	fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C\n")
+	 
 	// Declare the consumer permisions to eat
-	consume, err := ch.QueueDeclarePassive(
+	consume, err := ch.QueueDeclare(
         "consume",	// name
         true,		// durable
         false,		// delete when unused
@@ -62,8 +65,8 @@ func main() {
         0,     	// prefetch size
         false,	// global
 	)
-	failOnError(err, "Failed to declare the consume queue")
-	fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C\n")
+	// failOnError(err, "Failed to declare the consume queue")
+	// fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C\n")
 
 	// Channel for the client to warn they finished
 	warn := make(chan int)
@@ -96,19 +99,19 @@ func main() {
 		random := rand.New(rand.NewSource(time.Now().UnixNano()))
 		sushi := rand.New(random).Intn(20)
 		fmt.Printf("Client will consume %d shushi pieces\n", sushi)
-
+		
 		for i := 0; i < sushi; i++ {
 			// Take a permission to eat
 			for d := range perms {
-				perms, err := strconv.Atoi(string(d.Body))
+				p, err = strconv.Atoi(string(d.Body))
 				failOnError(err, "Failed to convert body to int")
-				perms ++
+				
 				d.Ack(false)
 
 				break
 			}
 
-			p := p - 1
+			p = p - 1
 
 			// The consumer will consume 
 			for d := range cons {
