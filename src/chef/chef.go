@@ -1,10 +1,13 @@
 package main
 
+// Authors: Lluis Barca & Alejandro Medina
+// Link Video: https://drive.google.com/file/d/1XPPSNVxzOBjA7LfmyorhkpbOEHHpwzxO/view?usp=sharing
 import (
 	"fmt"
 	"math/rand"
-	"time"
 	"strconv"
+	"time"
+
 	amqp "github.com/streadway/amqp"
 )
 

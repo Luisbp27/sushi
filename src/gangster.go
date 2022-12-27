@@ -1,8 +1,10 @@
 package main
 
+// Authors: Lluis Barca & Alejandro Medina
 import (
 	"fmt"
 	"strconv"
+
 	amqp "github.com/streadway/amqp"
 )
 

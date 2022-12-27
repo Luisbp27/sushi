@@ -1,10 +1,12 @@
 package main
 
+// Authors: Lluis Barca & Alejandro Medina
 import (
 	"fmt"
 	"math/rand"
-	"time"
 	"strconv"
+	"time"
+
 	"github.com/streadway/amqp"
 )
 
